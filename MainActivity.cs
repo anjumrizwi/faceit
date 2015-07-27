@@ -20,13 +20,16 @@ namespace FaceIt
         private const string PromptText_SelectImage = "Select image";
         private const int PICK_IMAGE = 1;
         private const int TAKE_PICTURE = 2;
-        private Android.Net.Uri TempFileUri;
         private const string FaceAPIKey = "YOUR_KEY";
         private readonly FaceServiceClient faceServiceClient = new FaceServiceClient(FaceAPIKey);
         private static Color StrokeColor = Color.LightGreen;
         private static int strokeWidth = 6;
         private static int imageQuality = 100;
         private static int textSize = 30;
+
+        private Android.Net.Uri TempFileUri;
+        private int desiredHeight;
+        private int desiredWidth;
 
         /// <summary>
         /// Override default OnCreate
@@ -95,16 +98,23 @@ namespace FaceIt
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
+            //Choose picture
             if (requestCode == PICK_IMAGE && resultCode == Result.Ok)
             {
                 try
                 {
+                    ImageView imageView = FindViewById<ImageView>(Resource.Id.bitmapImageView);
                     Bitmap bitmap = BitmapFactory.DecodeStream(
                             ContentResolver.OpenInputStream(data.Data)
                         );
-                    Bitmap processedBitmap = await detectFacesAndMarkThem(bitmap);
-                    var imageView =
-                    FindViewById<ImageView>(Resource.Id.bitmapImageView);
+
+                    //Rescale bitmap
+                    desiredWidth = imageView.Width;
+                    double HeightWidthRatio = (double)bitmap.Height / bitmap.Width;
+                    desiredHeight = Convert.ToInt32(desiredWidth * HeightWidthRatio);
+                    Bitmap scaledBitmap = Bitmap.CreateScaledBitmap(bitmap, desiredWidth, desiredHeight, true);
+
+                    Bitmap processedBitmap = await detectFacesAndMarkThem(scaledBitmap);
                     imageView.SetImageBitmap(processedBitmap);
                 }
                 catch (Exception)
@@ -112,15 +122,23 @@ namespace FaceIt
                     //TODO: error handling
                 }
             }
+            //Take picture
             else if (requestCode == TAKE_PICTURE && resultCode == Result.Ok)
             {
                 try
                 {
+                    ImageView imageView = FindViewById<ImageView>(Resource.Id.bitmapImageView);
                     Bitmap bitmap = MediaStore.Images.Media.GetBitmap(
                             ContentResolver, TempFileUri
                         );
-                    Bitmap processedBitmap = await detectFacesAndMarkThem(bitmap);
-                    var imageView = FindViewById<ImageView>(Resource.Id.bitmapImageView);
+
+                    //Rescale bitmap
+                    desiredWidth = imageView.Width;
+                    double HeightWidthRatio = (double)bitmap.Height / bitmap.Width;
+                    desiredHeight = Convert.ToInt32(desiredWidth * HeightWidthRatio);
+                    Bitmap scaledBitmap = Bitmap.CreateScaledBitmap(bitmap, desiredWidth, desiredHeight, true);
+
+                    Bitmap processedBitmap = await detectFacesAndMarkThem(scaledBitmap);
                     imageView.SetImageBitmap(processedBitmap);
                 }
                 catch (Exception)
