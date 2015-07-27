@@ -28,6 +28,10 @@ namespace FaceIt
         private static int imageQuality = 100;
         private static int textSize = 30;
 
+        /// <summary>
+        /// Override default OnCreate
+        /// </summary>
+        /// <param name="bundle"></param>
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -81,6 +85,12 @@ namespace FaceIt
                     
         }
 
+        /// <summary>
+        /// Override default OnActivityResult
+        /// </summary>
+        /// <param name="requestCode"></param>
+        /// <param name="resultCode"></param>
+        /// <param name="data"></param>
         protected async override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
@@ -110,8 +120,7 @@ namespace FaceIt
                             ContentResolver, TempFileUri
                         );
                     Bitmap processedBitmap = await detectFacesAndMarkThem(bitmap);
-                    var imageView =
-                    FindViewById<ImageView>(Resource.Id.bitmapImageView);
+                    var imageView = FindViewById<ImageView>(Resource.Id.bitmapImageView);
                     imageView.SetImageBitmap(processedBitmap);
                 }
                 catch (Exception)
